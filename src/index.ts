@@ -1,6 +1,13 @@
 import * as ts from 'typescript'
 import { Writer } from './writer'
 
+const TYPE_MAPPING: Record<string, string> = {
+    'string': 'string',
+    'number': 'double',
+    'bigint': 'int64',
+    'boolean': 'bool',
+}
+
 export function transform(rootNames: readonly string[]): string | undefined {
     // Build a program using the set of root file names in fileNames
     const program = ts.createProgram(rootNames, {
@@ -51,8 +58,10 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
     function generateProto(symbol: ts.Symbol): string {
         const writer = new Writer()
+        let fieldNumber = 0
 
         writer.writeRaw('syntax = "proto3";')
+        writer.writeNewline()
         writer.writeNewline()
 
         writer.writeRaw(`message ${symbol.escapedName} {`)
@@ -66,11 +75,24 @@ export function transform(rootNames: readonly string[]): string | undefined {
                 writer.writeRaw('optional')
                 writer.writeSpace()
             }
-            const type = checker.getTypeOfSymbolAtLocation(member, member.valueDeclaration!)
+            const type = checker.typeToString(checker.getTypeOfSymbolAtLocation(member, member.valueDeclaration!))
+
+            if (TYPE_MAPPING[type]) {
+                writer.writeRaw(TYPE_MAPPING[type])
+                writer.writeSpace()
+            } else {
+                throw new Error('unsupported type')
+            }
 
             writer.writeRaw(member.escapedName.toString())
             writer.writeSpace()
-            writer.writeRaw(checker.typeToString(type))
+
+            writer.writeRaw('=')
+            writer.writeSpace()
+            writer.writeRaw(fieldNumber.toString())
+            fieldNumber += 1
+
+            writer.writeRaw(';')
 
             writer.writeNewline()
         })

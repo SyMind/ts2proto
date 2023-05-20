@@ -4,7 +4,7 @@ export class Writer {
 
     data: string = ''
 
-    private writeIndent(): void {
+    #writeIndent(): void {
         for(let i = 0; i < this.indentLevel; i++) {
             this.data += '  '
         }
@@ -21,7 +21,7 @@ export class Writer {
 
     writeRaw(text: string): void {
         if (this.lineStart) {
-            this.writeIndent()
+            this.#writeIndent()
             this.lineStart = false
         }
 

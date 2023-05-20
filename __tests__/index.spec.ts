@@ -7,5 +7,7 @@ test('basic', t => {
     const rootName = path.resolve(__dirname, '../__fixture__/simple/simple.ts')
 	const result = transform([rootName])
 
-    console.log('result: ', result)
+    const expect = fs.readFileSync(path.resolve(__dirname, '../__fixture__/simple/simple.proto'), 'utf-8')
+
+    t.is(result, expect)
 })

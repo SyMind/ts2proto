@@ -8,7 +8,8 @@
     "dev": "father dev",
     "build": "father build",
     "build:deps": "father prebundle",
-    "prepublishOnly": "father doctor && npm run build"
+    "prepublishOnly": "father doctor && npm run build",
+    "test": "ava"
   },
   "keywords": [],
   "authors": [
@@ -23,6 +24,22 @@
     "access": "public"
   },
   "devDependencies": {
-    "father": "^4.2.0"
+    "@types/dedent": "^0.7.0",
+    "ava": "^5.2.0",
+    "father": "^4.2.0",
+    "ts-node": "^10.9.1"
+  },
+  "ava": {
+    "timeout": "3m",
+    "extensions": {
+      "ts": "module"
+    },
+    "nodeArguments": [
+      "--loader=ts-node/esm"
+    ]
+  },
+  "dependencies": {
+    "@types/node": "^20.2.1",
+    "typescript": "^5.0.4"
   }
 }

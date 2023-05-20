@@ -3,6 +3,10 @@
     "strict": true,
     "declaration": true,
     "skipLibCheck": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "lib": ["ES2023", "dom"],
+    "target": "ES6",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
   }
 }

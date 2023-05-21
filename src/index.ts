@@ -50,10 +50,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
     /** True if this is visible outside this file, false otherwise */
     function isNodeExported(node: ts.Node): boolean {
-        return (
-            (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0 ||
-            (!!node.parent && node.parent.kind === ts.SyntaxKind.SourceFile)
-        )
+        return (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0
     }
 
     function generateProto(symbol: ts.Symbol): string {
@@ -69,13 +66,17 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
         writer.increaseIndent()
 
-        symbol.members!.forEach(member => {
-            const optional = member.flags & ts.SymbolFlags.Optional
+        const classType = checker.getTypeOfSymbol(symbol)
+        const prototypeSymbol = checker.getPropertyOfType(classType, 'prototype')!
+        const prototypeType = checker.getTypeOfSymbol(prototypeSymbol)
+
+        checker.getPropertiesOfType(prototypeType).forEach(property => {
+            const optional = property.flags & ts.SymbolFlags.Optional
             if (optional) {
                 writer.writeRaw('optional')
                 writer.writeSpace()
             }
-            const type = checker.typeToString(checker.getTypeOfSymbolAtLocation(member, member.valueDeclaration!))
+            const type = checker.typeToString(checker.getTypeOfSymbol(property))
 
             if (TYPE_MAPPING[type]) {
                 writer.writeRaw(TYPE_MAPPING[type])
@@ -84,7 +85,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
                 throw new Error('unsupported type')
             }
 
-            writer.writeRaw(member.escapedName.toString())
+            writer.writeRaw(property.escapedName.toString())
             writer.writeSpace()
 
             writer.writeRaw('=')

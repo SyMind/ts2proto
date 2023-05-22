@@ -39,7 +39,6 @@
     ]
   },
   "dependencies": {
-    "@types/node": "^20.2.1",
     "typescript": "^5.0.4"
   }
 }

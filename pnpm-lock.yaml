@@ -2,19 +2,24 @@ lockfileVersion: '6.0'
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.2.3
+        version: 20.2.3
 
   packages/cli:
+    dependencies:
+      commander:
+        specifier: ^10.0.1
+        version: 10.0.1
     devDependencies:
       father:
         specifier: ^4.2.0
-        version: 4.2.0(@types/node@20.2.1)(styled-components@5.3.10)(webpack@5.83.1)
+        version: 4.2.0(@types/node@20.2.3)(styled-components@5.3.10)(webpack@5.83.1)
 
   packages/core:
     dependencies:
-      '@types/node':
-        specifier: ^20.2.1
-        version: 20.2.1
       typescript:
         specifier: ^5.0.4
         version: 5.0.4
@@ -27,10 +32,10 @@ importers:
         version: 5.2.0
       father:
         specifier: ^4.2.0
-        version: 4.2.0(@types/node@20.2.1)(styled-components@5.3.10)(webpack@5.83.1)
+        version: 4.2.0(@types/node@20.2.3)(styled-components@5.3.10)(webpack@5.83.1)
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@20.2.1)(typescript@5.0.4)
+        version: 10.9.1(@types/node@20.2.3)(typescript@5.0.4)
 
 packages:
 
@@ -604,7 +609,7 @@ packages:
       '@jest/schemas': 29.4.3
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       '@types/yargs': 17.0.24
       chalk: 4.1.2
     dev: true
@@ -662,24 +667,24 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
-  /@microsoft/api-extractor-model@7.26.3(@types/node@20.2.1):
+  /@microsoft/api-extractor-model@7.26.3(@types/node@20.2.3):
     resolution: {integrity: sha512-1Y/JOkaCF5zE6P56saA0yPzEb7ZJwoF2d8fUYdzZY4I0p1gmqGbNk1h9WguvrN5hANg+2CaqcOX0eh+l4SAhJw==}
     dependencies:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.55.1(@types/node@20.2.1)
+      '@rushstack/node-core-library': 3.55.1(@types/node@20.2.3)
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  /@microsoft/api-extractor@7.34.3(@types/node@20.2.1):
+  /@microsoft/api-extractor@7.34.3(@types/node@20.2.3):
     resolution: {integrity: sha512-vXpU+i/MMinVzDxbLo3of1Sx/IS5bwOZl4XrX8YyqNBXFvovEer5ex0wckWumkBErDZtLOMp3zhZfYL3W7h3cg==}
     hasBin: true
     dependencies:
-      '@microsoft/api-extractor-model': 7.26.3(@types/node@20.2.1)
+      '@microsoft/api-extractor-model': 7.26.3(@types/node@20.2.3)
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.55.1(@types/node@20.2.1)
+      '@rushstack/node-core-library': 3.55.1(@types/node@20.2.3)
       '@rushstack/rig-package': 0.3.17
       '@rushstack/ts-command-line': 4.13.1
       colors: 1.2.5
@@ -765,7 +770,7 @@ packages:
       webpack: 5.83.1
     dev: true
 
-  /@rushstack/node-core-library@3.55.1(@types/node@20.2.1):
+  /@rushstack/node-core-library@3.55.1(@types/node@20.2.3):
     resolution: {integrity: sha512-t/nZHq4/4S3ltpYVyIsbbIqmcZx3qEe3Aaw8tI9B6XRNqCFzPxtoTopqTPTuRn8XqCtoDaSe6uMlnn7YCTu8lQ==}
     peerDependencies:
       '@types/node': '*'
@@ -773,7 +778,7 @@ packages:
       '@types/node':
         optional: true
     dependencies:
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       colors: 1.2.5
       fs-extra: 7.0.1
       import-lazy: 4.0.0
@@ -1011,8 +1016,9 @@ packages:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
 
-  /@types/node@20.2.1:
-    resolution: {integrity: sha512-DqJociPbZP1lbZ5SQPk4oag6W7AyaGMO6gSfRwq3PWl4PXTwJpRQJhDq4W0kzrg3w6tJ1SwlvGZ5uKFHY13LIg==}
+  /@types/node@20.2.3:
+    resolution: {integrity: sha512-pg9d0yC4rVNWQzX8U7xb4olIOFuuVL9za3bzMT2pu2SU0SNEi66i2qrvhE2qt0HvkhuCaWJu7pLNOt/Pj8BIrw==}
+    dev: true
 
   /@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
@@ -1834,6 +1840,11 @@ packages:
     engines: {node: '>=0.1.90'}
     dev: true
 
+  /commander@10.0.1:
+    resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
+    engines: {node: '>=14'}
+    dev: false
+
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
     dev: true
@@ -2497,11 +2508,11 @@ packages:
       reusify: 1.0.4
     dev: true
 
-  /father@4.2.0(@types/node@20.2.1)(styled-components@5.3.10)(webpack@5.83.1):
+  /father@4.2.0(@types/node@20.2.3)(styled-components@5.3.10)(webpack@5.83.1):
     resolution: {integrity: sha512-VSeT22bLthMhu5CnaVaRxpiJwg39JF5H7sRpko+/cvvBq3el0kdwbv/dvTiJ8kEFNK7w9Mr/ChzaoUggYcc5fQ==}
     hasBin: true
     dependencies:
-      '@microsoft/api-extractor': 7.34.3(@types/node@20.2.1)
+      '@microsoft/api-extractor': 7.34.3(@types/node@20.2.3)
       '@umijs/babel-preset-umi': 4.0.69(styled-components@5.3.10)
       '@umijs/bundler-utils': 4.0.69
       '@umijs/bundler-webpack': 4.0.69(styled-components@5.3.10)(typescript@4.8.4)(webpack@5.83.1)
@@ -3190,7 +3201,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.5.0
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       chalk: 4.1.2
       ci-info: 3.8.0
       graceful-fs: 4.2.11
@@ -3201,7 +3212,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
@@ -3210,7 +3221,7 @@ packages:
     resolution: {integrity: sha512-GLHN/GTAAMEy5BFdvpUfzr9Dr80zQqBrh0fz1mtRMe05hqP45+HfQltu7oTBfduD0UeZs09d+maFtFYAXFWvAA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       jest-util: 29.5.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -5034,7 +5045,7 @@ packages:
     resolution: {integrity: sha512-kdf4JKs8lbARxWdp7RKdNzoJBhGUcIalSYibuGyHJbmk40pOysQ0+QPvlkCOICOivDWU2IJo2rkrxyTK2AH4fw==}
     dev: true
 
-  /ts-node@10.9.1(@types/node@20.2.1)(typescript@5.0.4):
+  /ts-node@10.9.1(@types/node@20.2.3)(typescript@5.0.4):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -5053,7 +5064,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.2.1
+      '@types/node': 20.2.3
       acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3

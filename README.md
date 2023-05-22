@@ -8,8 +8,8 @@ Take a TypeScript:
 
 ```ts
 export class User {
-    name?: string;
-    age?: number;
+  name?: string;
+  age?: number;
 }
 ```
 

@@ -1,9 +1,12 @@
 {
-    "name": "ts2proto-project",
-    "description": "TypeScript to Protocol Buffers",
-    "private": true,
-    "authors": [
-        "SyMind <dacongsama@live.com>"
-    ],
-    "license": "MIT"
+  "name": "ts2proto-project",
+  "description": "TypeScript to Protocol Buffers",
+  "private": true,
+  "authors": [
+    "SyMind <dacongsama@live.com>"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.2.3"
+  }
 }

@@ -7,6 +7,7 @@ class Child {
 }
 
 export class Simple extends Message {
+    /* Name field */
     name: string;
     age: number;
     child: Child;

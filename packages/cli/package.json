@@ -22,9 +22,10 @@
     "access": "public"
   },
   "devDependencies": {
-    "father": "^4.2.0"
   },
   "dependencies": {
-    "commander": "^10.0.1"
+    "@ts2proto/core": "workspace:*",
+    "commander": "^10.0.1",
+    "glob": "^10.2.6"
   }
 }

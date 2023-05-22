@@ -4,8 +4,8 @@
     "declaration": true,
     "skipLibCheck": true,
     "baseUrl": "./",
-    "lib": ["ES2023", "dom"],
-    "target": "ES6",
+    "lib": ["esnext", "dom"],
+    "target": "es6",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
   }

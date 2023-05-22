@@ -10,11 +10,13 @@ export class Simple extends Message {
     name: string;
     age: number;
     child: Child;
+    grandChildren: Child[];
 
     constructor() {
         super()
         this.name = ''
         this.age = 0
         this.child = new Child()
+        this.grandChildren = []
     }
 }

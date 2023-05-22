@@ -65,7 +65,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
         function generateProtoMessage(symbol: ts.Symbol) {
             let fieldNumber = 0
 
-            const propertyTypeSymbols: ts.Symbol[] = []
+            const propertyTypeSymbols = new Set<ts.Symbol>()
 
             writer.writeRaw(`message ${symbol.escapedName} {`)
             writer.writeNewline()
@@ -89,11 +89,25 @@ export function transform(rootNames: readonly string[]): string | undefined {
                 if (TYPE_MAPPING[propertyTypeString]) {
                     writer.writeRaw(TYPE_MAPPING[propertyTypeString])
                     writer.writeSpace()
+                } else if (checker.isArrayType(propertyType)) {
+                    writer.writeRaw('repeated')
+                    writer.writeSpace()
+
+                    if ((propertyType as any).typeArguments.length !== 1) {
+                        throw new Error('unsupported type')
+                    }
+
+                    const arrayItemType = (propertyType as any).typeArguments[0]
+
+                    writer.writeRaw(checker.typeToString(arrayItemType))
+                    writer.writeSpace()
+
+                    propertyTypeSymbols.add(arrayItemType.symbol)
                 } else if (propertyType.flags & ts.TypeFlags.Object) {
                     writer.writeRaw(propertyTypeString)
                     writer.writeSpace()
 
-                    propertyTypeSymbols.push(propertyType.symbol)
+                    propertyTypeSymbols.add(propertyType.symbol)
                 } else {
                     throw new Error('unsupported type')
                 }

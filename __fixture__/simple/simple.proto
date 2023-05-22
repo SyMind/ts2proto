@@ -4,7 +4,8 @@ message Simple {
   string name = 0;
   double age = 1;
   Child child = 2;
-  double code = 3;
+  repeated Child grandChildren = 3;
+  double code = 4;
 }
 
 message Child {

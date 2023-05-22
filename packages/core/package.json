@@ -1,5 +1,5 @@
 {
-  "name": "ts2proto",
+  "name": "@ts2proto/core",
   "version": "0.0.1",
   "description": "TypeScript to Protocol Buffers",
   "main": "dist/cjs/index.js",

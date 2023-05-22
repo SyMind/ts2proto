@@ -1,26 +1,30 @@
 lockfileVersion: '6.0'
 
-dependencies:
-  '@types/node':
-    specifier: ^20.2.1
-    version: 20.2.1
-  typescript:
-    specifier: ^5.0.4
-    version: 5.0.4
+importers:
 
-devDependencies:
-  '@types/dedent':
-    specifier: ^0.7.0
-    version: 0.7.0
-  ava:
-    specifier: ^5.2.0
-    version: 5.2.0
-  father:
-    specifier: ^4.2.0
-    version: 4.2.0(@types/node@20.2.1)(styled-components@5.3.10)(webpack@5.83.1)
-  ts-node:
-    specifier: ^10.9.1
-    version: 10.9.1(@types/node@20.2.1)(typescript@5.0.4)
+  .: {}
+
+  packages/core:
+    dependencies:
+      '@types/node':
+        specifier: ^20.2.1
+        version: 20.2.1
+      typescript:
+        specifier: ^5.0.4
+        version: 5.0.4
+    devDependencies:
+      '@types/dedent':
+        specifier: ^0.7.0
+        version: 0.7.0
+      ava:
+        specifier: ^5.2.0
+        version: 5.2.0
+      father:
+        specifier: ^4.2.0
+        version: 4.2.0(@types/node@20.2.1)(styled-components@5.3.10)(webpack@5.83.1)
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@types/node@20.2.1)(typescript@5.0.4)
 
 packages:
 
@@ -613,6 +617,11 @@ packages:
     engines: {node: '>=6.0.0'}
     dev: true
 
+  /@jridgewell/resolve-uri@3.1.1:
+    resolution: {integrity: sha512-dSYZh7HhCDtCKm4QakX0xFpsRDqjjtZf/kjI/v3T3Nwt5r8/qz/M19F9ySyOqU94SXBmeG9ttTul+YnR4LOxFA==}
+    engines: {node: '>=6.0.0'}
+    dev: true
+
   /@jridgewell/set-array@1.1.2:
     resolution: {integrity: sha512-xnkseuNADM0gt2bs+BvhO0p78Mk762YnZdsuzFV018NoG1Sj1SCQvpSqa7XUaTam5vAGasABV9qXASMKnFMwMw==}
     engines: {node: '>=6.0.0'}
@@ -643,7 +652,7 @@ packages:
   /@jridgewell/trace-mapping@0.3.9:
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
     dependencies:
-      '@jridgewell/resolve-uri': 3.1.0
+      '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
@@ -1633,8 +1642,8 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001488
-      electron-to-chromium: 1.4.401
-      node-releases: 2.0.10
+      electron-to-chromium: 1.4.402
+      node-releases: 2.0.11
       update-browserslist-db: 1.0.11(browserslist@4.21.5)
     dev: true
 
@@ -2193,8 +2202,8 @@ packages:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
     dev: true
 
-  /electron-to-chromium@1.4.401:
-    resolution: {integrity: sha512-AswqHsYyEbfSn0x87n31Na/xttUqEAg7NUjpiyxC20MaWKLyadOYHMzyLdF78N1iw+FK8/2KHLpZxRdyRILgtA==}
+  /electron-to-chromium@1.4.402:
+    resolution: {integrity: sha512-gWYvJSkohOiBE6ecVYXkrDgNaUjo47QEKK0kQzmWyhkH+yoYiG44bwuicTGNSIQRG3WDMsWVZJLRnJnLNkbWvA==}
     dev: true
 
   /elliptic@6.5.4:
@@ -3597,8 +3606,8 @@ packages:
       vm-browserify: 1.1.2
     dev: true
 
-  /node-releases@2.0.10:
-    resolution: {integrity: sha512-5GFldHPXVG/YZmFzJvKK2zDSzPKhEp0+ZR5SVaoSag9fsL5YgHbUHDfnG5494ISANDcK4KwPXAx2xqVEydmd7w==}
+  /node-releases@2.0.11:
+    resolution: {integrity: sha512-+M0PwXeU80kRohZ3aT4J/OnR+l9/KD2nVLNNoRgFtnf+umQVFdGBAO2N8+nCnEi0xlh/Wk3zOGC+vNNx+uM79Q==}
     dev: true
 
   /nofilter@3.1.0:

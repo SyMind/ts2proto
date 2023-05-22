@@ -1,45 +1,9 @@
 {
-  "name": "ts2proto",
-  "version": "0.0.1",
-  "description": "TypeScript to Protocol Buffers",
-  "main": "dist/cjs/index.js",
-  "types": "dist/cjs/index.d.ts",
-  "scripts": {
-    "dev": "father dev",
-    "build": "father build",
-    "build:deps": "father prebundle",
-    "prepublishOnly": "father doctor && npm run build",
-    "test": "ava"
-  },
-  "keywords": [],
-  "authors": [
-    "SyMind <dacongsama@live.com>"
-  ],
-  "license": "MIT",
-  "files": [
-    "dist",
-    "compiled"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "@types/dedent": "^0.7.0",
-    "ava": "^5.2.0",
-    "father": "^4.2.0",
-    "ts-node": "^10.9.1"
-  },
-  "ava": {
-    "timeout": "3m",
-    "extensions": {
-      "ts": "module"
-    },
-    "nodeArguments": [
-      "--loader=ts-node/esm"
-    ]
-  },
-  "dependencies": {
-    "@types/node": "^20.2.1",
-    "typescript": "^5.0.4"
-  }
+    "name": "ts2proto-project",
+    "description": "TypeScript to Protocol Buffers",
+    "private": true,
+    "authors": [
+        "SyMind <dacongsama@live.com>"
+    ],
+    "license": "MIT"
 }

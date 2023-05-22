@@ -1,7 +1,12 @@
 syntax = "proto3";
 
 message Simple {
-  optional string name = 0;
-  optional double age = 1;
-  double code = 2;
+  string name = 0;
+  double age = 1;
+  Child child = 2;
+  double code = 3;
+}
+
+message Child {
+  string name = 0;
 }

@@ -55,52 +55,72 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
     function generateProto(symbol: ts.Symbol): string {
         const writer = new Writer()
-        let fieldNumber = 0
 
         writer.writeRaw('syntax = "proto3";')
         writer.writeNewline()
         writer.writeNewline()
 
-        writer.writeRaw(`message ${symbol.escapedName} {`)
-        writer.writeNewline()
+        generateProtoMessage(symbol)
 
-        writer.increaseIndent()
+        function generateProtoMessage(symbol: ts.Symbol) {
+            let fieldNumber = 0
 
-        const classType = checker.getTypeOfSymbol(symbol)
-        const prototypeSymbol = checker.getPropertyOfType(classType, 'prototype')!
-        const prototypeType = checker.getTypeOfSymbol(prototypeSymbol)
+            const propertyTypeSymbols: ts.Symbol[] = []
 
-        checker.getPropertiesOfType(prototypeType).forEach(property => {
-            const optional = property.flags & ts.SymbolFlags.Optional
-            if (optional) {
-                writer.writeRaw('optional')
-                writer.writeSpace()
-            }
-            const type = checker.typeToString(checker.getTypeOfSymbol(property))
-
-            if (TYPE_MAPPING[type]) {
-                writer.writeRaw(TYPE_MAPPING[type])
-                writer.writeSpace()
-            } else {
-                throw new Error('unsupported type')
-            }
-
-            writer.writeRaw(property.escapedName.toString())
-            writer.writeSpace()
-
-            writer.writeRaw('=')
-            writer.writeSpace()
-            writer.writeRaw(fieldNumber.toString())
-            fieldNumber += 1
-
-            writer.writeRaw(';')
-
+            writer.writeRaw(`message ${symbol.escapedName} {`)
             writer.writeNewline()
-        })
+    
+            writer.increaseIndent()
+    
+            const classType = checker.getTypeOfSymbol(symbol)
+            const prototypeSymbol = checker.getPropertyOfType(classType, 'prototype')!
+            const prototypeType = checker.getTypeOfSymbol(prototypeSymbol)
+    
+            checker.getPropertiesOfType(prototypeType).forEach(property => {
+                const optional = property.flags & ts.SymbolFlags.Optional
+                if (optional) {
+                    writer.writeRaw('optional')
+                    writer.writeSpace()
+                }
+    
+                const propertyType = checker.getTypeOfSymbol(property)
+                const propertyTypeString = checker.typeToString(propertyType)
+    
+                if (TYPE_MAPPING[propertyTypeString]) {
+                    writer.writeRaw(TYPE_MAPPING[propertyTypeString])
+                    writer.writeSpace()
+                } else if (propertyType.flags & ts.TypeFlags.Object) {
+                    writer.writeRaw(propertyTypeString)
+                    writer.writeSpace()
 
-        writer.decreaseIndent()
+                    propertyTypeSymbols.push(propertyType.symbol)
+                } else {
+                    throw new Error('unsupported type')
+                }
+    
+                writer.writeRaw(property.escapedName.toString())
+                writer.writeSpace()
+    
+                writer.writeRaw('=')
+                writer.writeSpace()
+                writer.writeRaw(fieldNumber.toString())
+                fieldNumber += 1
+    
+                writer.writeRaw(';')
+    
+                writer.writeNewline()
+            })
+    
+            writer.decreaseIndent()
+    
+            writer.writeRaw('}')
 
-        writer.writeRaw('}')
+            for (const propertyTypeSymbol of propertyTypeSymbols) {
+                writer.writeNewline()
+                writer.writeNewline()
+                generateProtoMessage(propertyTypeSymbol)
+            }
+        }
 
         return writer.toString()
     }

@@ -2,10 +2,19 @@ class Message {
     code: number = 0;
 }
 
-export class Simple extends Message {
-    /** Name field */
-    name?: string;
+class Child {
+    name: string = '';
+}
 
-    /** Age */
-    age?: number;
+export class Simple extends Message {
+    name: string;
+    age: number;
+    child: Child;
+
+    constructor() {
+        super()
+        this.name = ''
+        this.age = 0
+        this.child = new Child()
+    }
 }

@@ -6,7 +6,7 @@ const TYPE_MAPPING: Record<string, string> = {
   number: 'double',
   bigint: 'int64',
   boolean: 'bool',
-};
+}
 
 export function transform(rootNames: readonly string[]): string | undefined {
   // Build a program using the set of root file names in fileNames
@@ -16,8 +16,13 @@ export function transform(rootNames: readonly string[]): string | undefined {
   });
 
   // Get the checker, we will use it to find more about classes
-  const checker = program.getTypeChecker();
-  let output: string | undefined;
+  const checker = program.getTypeChecker()
+  const writer = new Writer()
+
+  const propertyTypeSymbols = new Set<ts.Symbol>();
+
+  writer.writeRaw('syntax = "proto3";')
+  writer.writeNewline();
 
   // Visit every sourceFile in the program
   for (const sourceFile of program.getSourceFiles()) {
@@ -38,7 +43,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
       // This is a top level class, get its symbol
       const symbol = checker.getSymbolAtLocation(node.name);
       if (symbol) {
-        output = generateProto(symbol);
+        generateProtoMessage(symbol)
       }
       // No need to walk any further, class expressions/inner declarations
       // cannot be exported
@@ -50,101 +55,83 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
   /** True if this is visible outside this file, false otherwise */
   function isNodeExported(node: ts.Node): boolean {
-    return (
-      (ts.getCombinedModifierFlags(node as ts.Declaration) &
-        ts.ModifierFlags.Export) !==
-      0
-    );
+    return (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0
   }
 
-  function generateProto(symbol: ts.Symbol): string {
-    const writer = new Writer();
-
-    writer.writeRaw('syntax = "proto3";')
-    writer.writeNewline();
+  function generateProtoMessage(symbol: ts.Symbol) {
     writer.writeNewline();
 
-    generateProtoMessage(symbol);
+    let fieldNumber = 0;
 
-    function generateProtoMessage(symbol: ts.Symbol) {
-      let fieldNumber = 0;
+    writer.writeRaw(`message ${symbol.escapedName} {`);
+    writer.writeNewline();
 
-      const propertyTypeSymbols = new Set<ts.Symbol>();
+    writer.increaseIndent();
 
-      writer.writeRaw(`message ${symbol.escapedName} {`);
-      writer.writeNewline();
+    const classType = checker.getTypeOfSymbol(symbol);
+    const prototypeSymbol = checker.getPropertyOfType(
+      classType,
+      'prototype'
+    )!;
+    const prototypeType = checker.getTypeOfSymbol(prototypeSymbol);
 
-      writer.increaseIndent();
+    checker.getPropertiesOfType(prototypeType).forEach((property) => {
+      const optional = property.flags & ts.SymbolFlags.Optional;
+      if (optional) {
+        writer.writeRaw('optional');
+        writer.writeSpace();
+      }
 
-      const classType = checker.getTypeOfSymbol(symbol);
-      const prototypeSymbol = checker.getPropertyOfType(
-        classType,
-        'prototype'
-      )!;
-      const prototypeType = checker.getTypeOfSymbol(prototypeSymbol);
+      const propertyType = checker.getTypeOfSymbol(property);
+      const propertyTypeString = checker.typeToString(propertyType);
 
-      checker.getPropertiesOfType(prototypeType).forEach((property) => {
-        const optional = property.flags & ts.SymbolFlags.Optional;
-        if (optional) {
-          writer.writeRaw('optional');
-          writer.writeSpace();
-        }
+      if (TYPE_MAPPING[propertyTypeString]) {
+        writer.writeRaw(TYPE_MAPPING[propertyTypeString]);
+        writer.writeSpace();
+      } else if (checker.isArrayType(propertyType)) {
+        writer.writeRaw('repeated');
+        writer.writeSpace();
 
-        const propertyType = checker.getTypeOfSymbol(property);
-        const propertyTypeString = checker.typeToString(propertyType);
-
-        if (TYPE_MAPPING[propertyTypeString]) {
-          writer.writeRaw(TYPE_MAPPING[propertyTypeString]);
-          writer.writeSpace();
-        } else if (checker.isArrayType(propertyType)) {
-          writer.writeRaw('repeated');
-          writer.writeSpace();
-
-          if ((propertyType as any).typeArguments.length !== 1) {
-            throw new Error('unsupported type');
-          }
-
-          const arrayItemType = (propertyType as any).typeArguments[0];
-
-          writer.writeRaw(checker.typeToString(arrayItemType));
-          writer.writeSpace();
-
-          propertyTypeSymbols.add(arrayItemType.symbol);
-        } else if (propertyType.flags & ts.TypeFlags.Object) {
-          writer.writeRaw(propertyTypeString);
-          writer.writeSpace();
-
-          propertyTypeSymbols.add(propertyType.symbol);
-        } else {
+        if ((propertyType as any).typeArguments.length !== 1) {
           throw new Error('unsupported type');
         }
 
-        writer.writeRaw(property.escapedName.toString());
+        const arrayItemType = (propertyType as any).typeArguments[0];
+
+        writer.writeRaw(checker.typeToString(arrayItemType));
         writer.writeSpace();
 
-        writer.writeRaw('=');
+        propertyTypeSymbols.add(arrayItemType.symbol);
+      } else if (propertyType.flags & ts.TypeFlags.Object) {
+        writer.writeRaw(propertyTypeString);
         writer.writeSpace();
-        writer.writeRaw(fieldNumber.toString());
-        fieldNumber += 1;
 
-        writer.writeRaw(';');
-
-        writer.writeNewline();
-      });
-
-      writer.decreaseIndent();
-
-      writer.writeRaw('}');
-
-      for (const propertyTypeSymbol of propertyTypeSymbols) {
-        writer.writeNewline();
-        writer.writeNewline();
-        generateProtoMessage(propertyTypeSymbol);
+        propertyTypeSymbols.add(propertyType.symbol);
+      } else {
+        throw new Error('unsupported type');
       }
-    }
 
-    return writer.toString();
+      writer.writeRaw(property.escapedName.toString());
+      writer.writeSpace();
+
+      writer.writeRaw('=');
+      writer.writeSpace();
+      writer.writeRaw(fieldNumber.toString());
+      fieldNumber += 1;
+
+      writer.writeRaw(';');
+
+      writer.writeNewline();
+    });
+
+    writer.decreaseIndent();
+    writer.writeRaw('}');
+    writer.writeNewline();
   }
 
-  return output;
+  for (const propertyTypeSymbol of propertyTypeSymbols) {
+    generateProtoMessage(propertyTypeSymbol)
+  }
+
+  return writer.toString()
 }

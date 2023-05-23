@@ -1,23 +1,32 @@
 class Message {
-    code: number = 0;
+  code: number = 0;
 }
 
 class Child {
-    name: string = '';
+  name: string = '';
 }
 
 export class Simple extends Message {
-    /* Name field */
-    name: string;
-    age: number;
-    child: Child;
-    grandChildren: Child[];
+  /* Name field */
+  name: string;
+  /** Age */
+  age: number;
+  child: Child;
+  grandChildren: Child[];
 
-    constructor() {
-        super()
-        this.name = ''
-        this.age = 0
-        this.child = new Child()
-        this.grandChildren = []
-    }
+  constructor(name: string, age: number, child: Child, grandChildren: Child[]) {
+    super()
+    this.name = name
+    this.age = age
+    this.child = child
+    this.grandChildren = grandChildren
+  }
+}
+
+export class SimpleButOptional {
+  /** Name field */
+  name?: string;
+  /** Age */
+  age?: number;
+  child?: Child;
 }

@@ -8,6 +8,12 @@ message Simple {
   double code = 4;
 }
 
+message SimpleButOptional {
+  optional string name = 0;
+  optional double age = 1;
+  optional Child child = 2;
+}
+
 message Child {
   string name = 0;
 }

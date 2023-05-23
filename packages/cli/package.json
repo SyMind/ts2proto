@@ -9,7 +9,13 @@
     "build:deps": "father prebundle",
     "prepublishOnly": "father doctor && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "ts",
+    "typescript",
+    "proto",
+    "protobuf",
+    "protocol buffers"
+  ],
   "authors": [
     "SyMind <dacongsama@live.com>"
   ],
@@ -19,6 +25,7 @@
     "compiled"
   ],
   "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "devDependencies": {

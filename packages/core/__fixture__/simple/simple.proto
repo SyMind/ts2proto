@@ -14,6 +14,12 @@ message SimpleButOptional {
   optional Child child = 2;
 }
 
+message SimpleButUnion {
+  optional string name = 0;
+  optional double age = 1;
+  optional Child child = 2;
+}
+
 message Child {
   string name = 0;
 }

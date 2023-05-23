@@ -30,3 +30,11 @@ export class SimpleButOptional {
   age?: number;
   child?: Child;
 }
+
+export class SimpleButUnion {
+  /** Name field */
+  name: string | undefined;
+  /** Age */
+  age: number | undefined;
+  child: Child | undefined;
+}

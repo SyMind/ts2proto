@@ -1,7 +1,7 @@
 import * as ts from 'typescript'
 import { Writer } from './writer'
 
-const TYPE_MAPPING: Record<string, string> = {
+const PRIMITIVE_TYPE_MAPPING: Record<string, string> = {
   string: 'string',
   number: 'double',
   bigint: 'int64',
@@ -88,16 +88,28 @@ class TypeVisitor extends Visitor {
   }
 
   visitClassProperty(symbol: ts.Symbol): void {
-    if (symbol.flags & ts.SymbolFlags.Optional) {
+    let propertyType = this.checker.getTypeOfSymbol(symbol)
+    let propertyTypeString = this.checker.typeToString(propertyType)
+
+    if (propertyType.flags & ts.TypeFlags.Union) {
+      const { types } = propertyType as ts.UnionType
+      // like `number | undefined`
+      if (types.length === 2 && types.some(type => this.checker.typeToString(type) === 'undefined')) {
+        this.writer.writeRaw('optional')
+        this.writer.writeSpace()
+
+        propertyType = types.find(type => this.checker.typeToString(type) !== 'undefined')!
+        propertyTypeString = this.checker.typeToString(propertyType)
+      } else {
+        throw new Error(`This union type is not supported: ${propertyTypeString}`)
+      }
+    } else if (symbol.flags & ts.SymbolFlags.Optional) {
       this.writer.writeRaw('optional')
       this.writer.writeSpace()
     }
 
-    const propertyType = this.checker.getTypeOfSymbol(symbol)
-    const propertyTypeString = this.checker.typeToString(propertyType)
-
-    if (TYPE_MAPPING[propertyTypeString]) {
-      this.writer.writeRaw(TYPE_MAPPING[propertyTypeString])
+    if (PRIMITIVE_TYPE_MAPPING[propertyTypeString]) {
+      this.writer.writeRaw(PRIMITIVE_TYPE_MAPPING[propertyTypeString])
       this.writer.writeSpace()
     } else if (this.checker.isArrayType(propertyType)) {
       this.writer.writeRaw('repeated')
@@ -142,6 +154,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
   const program = ts.createProgram(rootNames, {
     target: ts.ScriptTarget.ES5,
     module: ts.ModuleKind.CommonJS,
+    strict: true
   })
 
   // Get the checker, we will use it to find more about classes

@@ -1,42 +1,42 @@
 export class Writer {
-  indentLevel: number = 0;
-  lineStart: boolean = true;
+  indentLevel: number = 0
+  lineStart: boolean = true
 
-  data: string = '';
+  buffer: string[] = []
 
-  #writeIndent(): void {
+  private writeIndent(): void {
     for (let i = 0; i < this.indentLevel; i++) {
-      this.data += '  ';
+      this.buffer.push('  ')
     }
   }
 
   writeSpace(): void {
-    this.data += ' ';
+    this.buffer.push(' ')
   }
 
   writeNewline(): void {
-    this.lineStart = true;
-    this.data += '\n';
+    this.lineStart = true
+    this.buffer.push('\n')
   }
 
   writeRaw(text: string): void {
     if (this.lineStart) {
-      this.#writeIndent();
-      this.lineStart = false;
+      this.writeIndent()
+      this.lineStart = false
     }
 
-    this.data += text;
+    this.buffer.push(text)
   }
 
   increaseIndent(): void {
-    this.indentLevel += 1;
+    this.indentLevel += 1
   }
 
   decreaseIndent(): void {
-    this.indentLevel -= 1;
+    this.indentLevel -= 1
   }
 
   toString(): string {
-    return this.data;
+    return this.buffer.join('')
   }
 }

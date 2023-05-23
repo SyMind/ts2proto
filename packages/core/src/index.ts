@@ -8,12 +8,8 @@ const TYPE_MAPPING: Record<string, string> = {
   boolean: 'bool',
 }
 
-abstract class Visitor {
+class Visitor {
   constructor(protected checker: ts.TypeChecker, protected writer: Writer) {
-  }
-
-  protected isNodeExported(node: ts.Node): boolean {
-    return (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0
   }
 
   visitProgram(program: ts.Program): void {
@@ -46,92 +42,98 @@ abstract class Visitor {
     }
   }
 
-  abstract visitClassDeclaration(symbol: ts.Symbol): void
+  visitClassDeclaration(symbol: ts.Symbol): void {
+    const classType = this.checker.getTypeOfSymbol(symbol)
+    const prototypeSymbol = this.checker.getPropertyOfType(classType, 'prototype')!
+    const prototypeType = this.checker.getTypeOfSymbol(prototypeSymbol)
+    
+    this.checker.getPropertiesOfType(prototypeType).forEach(property => this.visitClassProperty(property))
+  }
+
+  visitClassProperty(symbol: ts.Symbol): void {
+  }
+
+  private isNodeExported(node: ts.Node): boolean {
+    return (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0
+  }
 }
 
 class TypeVisitor extends Visitor {
   private propertyTypeSymbols = new Set<ts.Symbol>()
 
+  private fieldNumber = 0
+
   visitProgram(program: ts.Program): void {
     super.visitProgram(program)
 
     for (const propertyTypeSymbol of this.propertyTypeSymbols) {
-      this.generateProtoMessage(propertyTypeSymbol)
+      this.visitClassDeclaration(propertyTypeSymbol)
     }
   }
 
   visitClassDeclaration(symbol: ts.Symbol): void {
-    this.generateProtoMessage(symbol)
+    this.writer.writeNewline()
+
+    this.fieldNumber = 0
+
+    this.writer.writeRaw(`message ${symbol.escapedName} {`)
+    this.writer.writeNewline()
+    this.writer.increaseIndent()
+
+    super.visitClassDeclaration(symbol)
+
+    this.writer.decreaseIndent()
+    this.writer.writeRaw('}')
+    this.writer.writeNewline()
   }
 
-  private generateProtoMessage(symbol: ts.Symbol): void {
-    const { checker, writer} = this
+  visitClassProperty(symbol: ts.Symbol): void {
+    if (symbol.flags & ts.SymbolFlags.Optional) {
+      this.writer.writeRaw('optional')
+      this.writer.writeSpace()
+    }
 
-    writer.writeNewline()
+    const propertyType = this.checker.getTypeOfSymbol(symbol)
+    const propertyTypeString = this.checker.typeToString(propertyType)
 
-    let fieldNumber = 0
+    if (TYPE_MAPPING[propertyTypeString]) {
+      this.writer.writeRaw(TYPE_MAPPING[propertyTypeString])
+      this.writer.writeSpace()
+    } else if (this.checker.isArrayType(propertyType)) {
+      this.writer.writeRaw('repeated')
+      this.writer.writeSpace()
 
-    writer.writeRaw(`message ${symbol.escapedName} {`)
-    writer.writeNewline()
-
-    writer.increaseIndent()
-
-    const classType = checker.getTypeOfSymbol(symbol)
-    const prototypeSymbol = checker.getPropertyOfType(classType, 'prototype')!
-    const prototypeType = checker.getTypeOfSymbol(prototypeSymbol)
-
-    checker.getPropertiesOfType(prototypeType).forEach((property) => {
-      const optional = property.flags & ts.SymbolFlags.Optional
-      if (optional) {
-        writer.writeRaw('optional')
-        writer.writeSpace()
-      }
-
-      const propertyType = checker.getTypeOfSymbol(property)
-      const propertyTypeString = checker.typeToString(propertyType)
-
-      if (TYPE_MAPPING[propertyTypeString]) {
-        writer.writeRaw(TYPE_MAPPING[propertyTypeString])
-        writer.writeSpace()
-      } else if (checker.isArrayType(propertyType)) {
-        writer.writeRaw('repeated')
-        writer.writeSpace()
-
-        if ((propertyType as any).typeArguments.length !== 1) {
-          throw new Error('unsupported type')
-        }
-
-        const arrayItemType = (propertyType as any).typeArguments[0]
-
-        writer.writeRaw(checker.typeToString(arrayItemType))
-        writer.writeSpace()
-
-        this.propertyTypeSymbols.add(arrayItemType.symbol)
-      } else if (propertyType.flags & ts.TypeFlags.Object) {
-        writer.writeRaw(propertyTypeString)
-        writer.writeSpace()
-
-        this.propertyTypeSymbols.add(propertyType.symbol)
-      } else {
+      if ((propertyType as any).typeArguments.length !== 1) {
         throw new Error('unsupported type')
       }
 
-      writer.writeRaw(property.escapedName.toString())
-      writer.writeSpace()
+      const arrayItemType = (propertyType as any).typeArguments[0]
 
-      writer.writeRaw('=')
-      writer.writeSpace()
-      writer.writeRaw(fieldNumber.toString())
-      fieldNumber += 1
+      this.writer.writeRaw(this.checker.typeToString(arrayItemType))
+      this.writer.writeSpace()
 
-      writer.writeRaw(';')
+      this.propertyTypeSymbols.add(arrayItemType.symbol)
+    } else if (propertyType.flags & ts.TypeFlags.Object) {
+      this.writer.writeRaw(propertyTypeString)
+      this.writer.writeSpace()
 
-      writer.writeNewline()
-    })
+      this.propertyTypeSymbols.add(propertyType.symbol)
+    } else {
+      throw new Error('unsupported type')
+    }
 
-    writer.decreaseIndent()
-    writer.writeRaw('}')
-    writer.writeNewline()
+    this.writer.writeRaw(symbol.escapedName.toString())
+    this.writer.writeSpace()
+
+    this.writer.writeRaw('=')
+    this.writer.writeSpace()
+    this.writer.writeRaw(this.fieldNumber.toString())
+    this.fieldNumber += 1
+
+    this.writer.writeRaw(';')
+    this.writer.writeNewline()
+
+    super.visitClassProperty(symbol)
   }
 }
 
@@ -149,8 +151,8 @@ export function transform(rootNames: readonly string[]): string | undefined {
   writer.writeRaw('syntax = "proto3";')
   writer.writeNewline()
 
-  const typeVisitor = new TypeVisitor(checker, writer)
-  typeVisitor.visitProgram(program)
+  const visitor = new TypeVisitor(checker, writer)
+  visitor.visitProgram(program)
 
   return writer.toString()
 }

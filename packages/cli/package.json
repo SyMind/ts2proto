@@ -1,6 +1,6 @@
 {
   "name": "@ts2proto/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "TypeScript to Protocol Buffers",
   "bin": {
     "ts2proto": "./bin/ts2proto"
@@ -30,8 +30,7 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
     "@ts2proto/core": "workspace:*",
     "commander": "^10.0.1",

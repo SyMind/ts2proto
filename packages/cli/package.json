@@ -2,7 +2,9 @@
   "name": "@ts2proto/cli",
   "version": "0.0.1",
   "description": "TypeScript to Protocol Buffers",
-  "bin": "bin/ts2proto",
+  "bin": {
+    "ts2proto": "./bin/ts2proto"
+  },
   "scripts": {
     "dev": "father dev",
     "build": "father build",

@@ -1,7 +1,9 @@
 syntax = "proto3";
 
 message Simple {
+  // Name field
   string name = 0;
+  // Age
   double age = 1;
   Child child = 2;
   repeated Child grandChildren = 3;
@@ -9,13 +11,17 @@ message Simple {
 }
 
 message SimpleButOptional {
+  // Name field
   optional string name = 0;
+  // Age
   optional double age = 1;
   optional Child child = 2;
 }
 
 message SimpleButUnion {
+  // Name field
   optional string name = 0;
+  // Age
   optional double age = 1;
   optional Child child = 2;
 }

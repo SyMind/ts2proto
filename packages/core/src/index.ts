@@ -115,8 +115,9 @@ class TypeVisitor extends Visitor {
       this.writer.writeRaw('repeated')
       this.writer.writeSpace()
 
-      if ((propertyType as any).typeArguments.length !== 1) {
-        throw new Error('unsupported type')
+      const { typeArguments } = propertyType as ts.TypeReference
+      if (typeArguments && typeArguments.length !== 1) {
+        throw new Error(`This tuple type is not supported: ${propertyTypeString}`)
       }
 
       const arrayItemType = (propertyType as any).typeArguments[0]
@@ -131,7 +132,7 @@ class TypeVisitor extends Visitor {
 
       this.propertyTypeSymbols.add(propertyType.symbol)
     } else {
-      throw new Error('unsupported type')
+      throw new Error(`This type is not supported: ${propertyTypeString}`)
     }
 
     this.writer.writeRaw(symbol.escapedName.toString())
@@ -145,6 +146,21 @@ class TypeVisitor extends Visitor {
     this.writer.writeRaw(';')
     this.writer.writeNewline()
 
+    super.visitClassProperty(symbol)
+  }
+}
+
+class JSDocVisitor extends TypeVisitor {
+  visitClassProperty(symbol: ts.Symbol): void {
+    const comments = symbol.getDocumentationComment(this.checker)
+    for (const comment of comments) {
+      if (comment.kind === 'text') {
+        this.writer.writeRaw('//')
+        this.writer.writeSpace()
+        this.writer.writeRaw(comment.text)
+        this.writer.writeNewline()
+      }
+    }
     super.visitClassProperty(symbol)
   }
 }
@@ -164,7 +180,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
   writer.writeRaw('syntax = "proto3";')
   writer.writeNewline()
 
-  const visitor = new TypeVisitor(checker, writer)
+  const visitor = new JSDocVisitor(checker, writer)
   visitor.visitProgram(program)
 
   return writer.toString()

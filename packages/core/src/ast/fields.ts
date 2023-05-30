@@ -1,43 +1,21 @@
-import { Token, MalformedBase, Option, OptionName, StatementBase } from '.';
+import { Token, Option, OptionName, StatementBase } from './proto';
 import {
   Comma,
   Constant,
   Empty,
-  IntLit,
-  Keyword,
   Semi,
   Type,
 } from './lexical-elements';
 import { MessageBody } from './top-level-definitions';
 
-export type Node =
-  | Field
-  | MalformedField
-  | FieldOptions
-  | FieldOption
-  | Group
-  | Oneof
-  | OneofBody
-  | OneofField
-  | OneofGroup
-  | MapField;
-
 export interface Field extends StatementBase {
   type: 'field';
-  fieldLabel?: Keyword;
-  fieldType: Type;
-  fieldName: Token;
-  eq: Token;
-  fieldNumber: IntLit;
+  fieldLabel?: string;
+  fieldType: string;
+  fieldName: string;
+  fieldNumber: number;
   fieldOptions?: FieldOptions;
-  semi: Semi;
 }
-export type MalformedField = MalformedBase<
-  Field,
-  'malformed-field',
-  | 'fieldLabel'
-  | 'fieldType'
->;
 
 export interface FieldOptions {
   type: 'field-options';
@@ -55,19 +33,19 @@ export interface FieldOption {
 
 export interface Group extends StatementBase {
   type: 'group';
-  groupLabel: Keyword;
-  keyword: Keyword;
+  groupLabel: string;
+  keyword: string;
   groupName: Token;
   eq: Token;
-  fieldNumber: IntLit;
+  fieldNumber: number;
   fieldOptions?: FieldOptions;
   messageBody: MessageBody;
 }
 
 export interface Oneof extends StatementBase {
   type: 'oneof';
-  keyword: Keyword;
-  oneofName: Token;
+  keyword: string;
+  oneofName: string;
   oneofBody: OneofBody;
 }
 
@@ -89,23 +67,23 @@ export interface OneofField extends StatementBase {
   fieldType: Type;
   fieldName: Token;
   eq: Token;
-  fieldNumber: IntLit;
+  fieldNumber: number;
   fieldOptions?: FieldOptions;
   semi: Semi;
 }
 
 export interface OneofGroup extends StatementBase {
   type: 'oneof-group';
-  keyword: Keyword;
+  keyword: string;
   groupName: Token;
   eq: Token;
-  fieldNumber: IntLit;
+  fieldNumber: number;
   messageBody: MessageBody;
 }
 
 export interface MapField extends StatementBase {
   type: 'map-field';
-  keyword: Keyword;
+  keyword: string;
   typeBracketOpen: Token;
   keyType: Type;
   typeSep: Token;
@@ -113,7 +91,7 @@ export interface MapField extends StatementBase {
   typeBracketClose: Token;
   mapName: Token;
   eq: Token;
-  fieldNumber: IntLit;
+  fieldNumber: number;
   fieldOptions?: FieldOptions;
   semi: Semi;
 }

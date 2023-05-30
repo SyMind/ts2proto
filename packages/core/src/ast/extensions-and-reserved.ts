@@ -1,23 +1,14 @@
-import { Token, StatementBase } from '.';
+import { Token, StatementBase } from './proto';
 import {
   Comma,
-  Keyword,
   Semi,
   SignedIntLit,
   StrLit,
 } from './lexical-elements';
 
-export type Node =
-  | Extensions
-  | Ranges
-  | Range
-  | Max
-  | Reserved
-  | FieldNames;
-
 export interface Extensions extends StatementBase {
   type: 'extensions';
-  keyword: Keyword;
+  keyword: string;
   ranges: Ranges;
   semi: Semi;
 }
@@ -30,7 +21,7 @@ export interface Ranges {
 export interface Range {
   type: 'range';
   rangeStart: SignedIntLit;
-  to?: Keyword;
+  to?: string;
   rangeEnd?: SignedIntLit | Max;
 }
 
@@ -40,7 +31,7 @@ export interface Max extends Token {
 
 export interface Reserved extends StatementBase {
   type: 'reserved';
-  keyword: Keyword;
+  keyword: string;
   reserved: Ranges | FieldNames;
   semi: Semi;
 }

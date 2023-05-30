@@ -4,6 +4,10 @@ import { Writer } from '../writer'
 export class CodeGenerator {
   writer = new Writer()
 
+  toString(): string {
+    return this.writer.toString()
+  }
+
   emitProto(node: ast.Proto): void {
     for (const statement of node.statements) {
       this.emitTopLevelStatement(statement)
@@ -31,8 +35,9 @@ export class CodeGenerator {
   }
 
   emitSyntax(node: ast.Syntax): void {
-    this.writer.writeRaw(`syntax = '${node.syntax}'`)
-    this.writer.writeNewline()
+    this.writer.writeRaw('syntax = "')
+    this.writer.writeRaw(node.syntax)
+    this.writer.writeRaw('";')
     this.writer.writeNewline()
   }
 
@@ -66,7 +71,9 @@ export class CodeGenerator {
   }
 
   emitMessage(node: ast.Message): void {
-    this.writer.writeRaw(`message ${node.keyword.text} {`)
+    this.writer.writeNewline()
+
+    this.writer.writeRaw(`message ${node.messageName} {`)
     this.writer.writeNewline()
     this.writer.increaseIndent()
 
@@ -74,7 +81,6 @@ export class CodeGenerator {
 
     this.writer.decreaseIndent()
     this.writer.writeRaw('}')
-    this.writer.writeNewline()
     this.writer.writeNewline()
   }
 
@@ -85,32 +91,67 @@ export class CodeGenerator {
   }
 
   emitMessageBodyStatement(node: ast.MessageBodyStatement): void {
+    this.emitComments(node.leadingComments)
+
     switch (node.type) {
       case 'field':
-        return this.emitField(node)
-      case 'malformed-field':
-        return this.emitMalformedField(node)
+        this.emitField(node)
+        break
       case 'enum':
-        return this.emitEnum(node)
+        this.emitEnum(node)
+        break
       case 'message':
-        return this.emitMessage(node)
+        this.emitMessage(node)
+        break
       case 'extend':
-        return this.emitExtend(node)
+        this.emitExtend(node)
+        break
       case 'extensions':
-        return this.emitExtensions(node)
+        this.emitExtensions(node)
+        break
       case 'group':
-        return this.emitGroup(node)
+        this.emitGroup(node)
+        break
       case 'option':
-        return this.emitOption(node)
+        this.emitOption(node)
+        break
       case 'oneof':
-        return this.emitOneof(node)
+        this.emitOneof(node)
+        break
       case 'map-field':
-        return this.emitMapField(node)
+        this.emitMapField(node)
+        break
       case 'reserved':
-        return this.emitReserved(node)
+        this.emitReserved(node)
+        break
       case 'empty':
-        return this.emitEmpty(node)
+        this.emitEmpty(node)
+        break
     }
+  }
+
+  emitComments(comments: ast.Comment[]): void {
+    for (const comment of comments) {
+      switch(comment.type) {
+        case 'singleline-comment':
+          this.emitSinglelineComment(comment)
+          break
+        case 'multiline-comment':
+          this.emitMultilineComment(comment)
+          break
+      }
+    }
+  }
+
+  emitSinglelineComment(comment: ast.SinglelineComment): void {
+    this.writer.writeRaw('//')
+    this.writer.writeSpace()
+    this.writer.writeRaw(comment.text)
+    this.writer.writeNewline()
+  }
+
+  emitMultilineComment(comment: ast.MultilineComment): void {
+
   }
 
   emitEnum(node: ast.Enum): void {
@@ -126,11 +167,24 @@ export class CodeGenerator {
   }
 
   emitField(node: ast.Field): void {
+    if (node.fieldLabel) {
+      this.writer.writeRaw(node.fieldLabel)
+      this.writer.writeSpace()
+    }
 
-  }
+    this.writer.writeRaw(node.fieldType)
+    this.writer.writeSpace()
 
-  emitMalformedField(node: ast.MalformedField): void {
+    this.writer.writeRaw(node.fieldName)
+    this.writer.writeSpace()
 
+    this.writer.writeRaw('=')
+    this.writer.writeSpace()
+
+    this.writer.writeRaw(node.fieldNumber.toString())
+    this.writer.writeRaw(';')
+
+    this.writer.writeNewline()
   }
 
   emitExtensions(node: ast.Extensions): void {
@@ -142,7 +196,13 @@ export class CodeGenerator {
   }
 
   emitOneof(node: ast.Oneof): void {
+    this.writer.writeRaw('oneof')
+    this.writer.writeSpace()
 
+    this.writer.writeRaw(node.oneofName)
+    this.writer.writeSpace()
+
+    this.emitOneofBody(node.oneofBody)
   }
 
   emitMapField(node: ast.MapField): void {
@@ -151,5 +211,14 @@ export class CodeGenerator {
 
   emitReserved(node: ast.Reserved): void {
 
+  }
+
+  emitType(node: ast.Type): void {
+    for (const identOrDot of node.identOrDots) {
+      this.writer.writeRaw(identOrDot.text)
+    }
+  }
+
+  emitOneofBody(node: ast.OneofBody): void {
   }
 }

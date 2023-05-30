@@ -1,31 +1,9 @@
-import { Token } from '.';
+import { Token } from './proto';
 
 export interface Textproto {
   statements: TextprotoMessageStatement[];
 }
 
-export type Node =
-  | TextprotoComment
-  | TextprotoField
-  | TextprotoSemi
-  | TextprotoComma
-  | TextprotoDot
-  | TextprotoFullIdent
-  | TextprotoExtensionName
-  | TextprotoAnyName
-  | TextprotoListValue
-  | TextprotoMessageValue
-  | TextprotoStrLit
-  | TextprotoIdent
-  | TextprotoFloatLit
-  | TextprotoDecLit
-  | TextprotoOctLit
-  | TextprotoHexLit
-  | TextprotoSignedIdent
-  | TextprotoSignedFloatLit
-  | TextprotoSignedDecLit
-  | TextprotoSignedOctLit
-  | TextprotoSignedHexLit;
 
 export interface TextprotoComment extends Token {
   type: 'textproto-comment';

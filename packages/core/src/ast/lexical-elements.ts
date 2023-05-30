@@ -1,43 +1,16 @@
-import { Token, StatementBase } from '.';
+import { Token, StatementBase } from './proto';
 import { TextprotoMessageStatement } from './textproto';
-
-export type Node =
-  | CommentGroup
-  | SinglelineComment
-  | MultilineComment
-  | Keyword
-  | Type
-  | FullIdent
-  | Ident
-  | Dot
-  | Comma
-  | Semi
-  | IntLit
-  | SignedIntLit
-  | FloatLit
-  | SignedFloatLit
-  | BoolLit
-  | StrLit
-  | Aggregate
-  | Empty;
-
-export interface CommentGroup {
-  type: 'comment-group';
-  comments: Comment[];
-}
 
 export type Comment = SinglelineComment | MultilineComment;
 
-export interface SinglelineComment extends Token {
+export interface SinglelineComment {
   type: 'singleline-comment';
+  text: string;
 }
 
-export interface MultilineComment extends Token {
+export interface MultilineComment {
   type: 'multiline-comment';
-}
-
-export interface Keyword extends Token {
-  type: 'keyword';
+  text: string;
 }
 
 export interface Type {

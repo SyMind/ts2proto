@@ -1,5 +1,5 @@
 import * as ast from '../ast'
-import { Writer } from '../writer'
+import { Writer } from './writer'
 
 export class CodeGenerator {
   writer = new Writer()

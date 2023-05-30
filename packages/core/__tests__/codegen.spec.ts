@@ -17,13 +17,16 @@ test('codegen', t => {
 
   const proto = ast.proto([
     ast.syntax('proto3'),
-    ast.message('Simple', [
-      name,
-      age,
-      child,
-      grandChildren,
-      double,
-    ])
+    ast.message(
+      'Simple',
+      ast.messageBody([
+        name,
+        age,
+        child,
+        grandChildren,
+        double,
+      ])
+    )
   ])
 
   const generator = new CodeGenerator()

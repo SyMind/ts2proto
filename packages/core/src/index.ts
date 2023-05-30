@@ -1,5 +1,6 @@
 import * as ts from 'typescript'
-import { Writer } from './writer'
+import * as ast from './ast'
+import { CodeGenerator } from './codegen'
 
 const PRIMITIVE_TYPE_MAPPING: Record<string, string> = {
   string: 'string',
@@ -8,8 +9,17 @@ const PRIMITIVE_TYPE_MAPPING: Record<string, string> = {
   boolean: 'bool',
 }
 
+type WIP = ast.Message
+  | ast.MessageBody
+  | null
+
 class Visitor {
-  constructor(protected checker: ts.TypeChecker, protected writer: Writer) {
+  proto = ast.proto()
+
+  wip: WIP = null
+
+  constructor(protected checker: ts.TypeChecker) {
+    this.proto.statements.push(ast.syntax('proto3'))
   }
 
   visitProgram(program: ts.Program): void {
@@ -32,7 +42,10 @@ class Visitor {
       // This is a top level class, get its symbol
       const symbol = this.checker.getSymbolAtLocation(node.name)
       if (symbol) {
-        this.visitClassDeclaration(symbol)
+        const message = this.visitClassDeclaration(symbol)
+        if (message) {
+          this.proto.statements.push(message)
+        }
       }
       // No need to walk any further, class expressions/inner declarations
       // cannot be exported
@@ -42,15 +55,24 @@ class Visitor {
     }
   }
 
-  visitClassDeclaration(symbol: ts.Symbol): void {
+  visitClassDeclaration(symbol: ts.Symbol): ast.Message | null {
     const classType = this.checker.getTypeOfSymbol(symbol)
     const prototypeSymbol = this.checker.getPropertyOfType(classType, 'prototype')!
     const prototypeType = this.checker.getTypeOfSymbol(prototypeSymbol)
     
-    this.checker.getPropertiesOfType(prototypeType).forEach(property => this.visitClassProperty(property))
+    const messageBody = ast.messageBody()
+    this.checker.getPropertiesOfType(prototypeType).forEach(property => {
+      const statement = this.visitClassProperty(property)
+      if (statement) {
+        messageBody.statements.push(statement)
+      }
+    })
+
+    return ast.message(symbol.escapedName.toString(), messageBody)
   }
 
-  visitClassProperty(symbol: ts.Symbol): void {
+  visitClassProperty(symbol: ts.Symbol): ast.MessageBodyStatement | null {
+    return null
   }
 
   private isNodeExported(node: ts.Node): boolean {
@@ -67,27 +89,23 @@ class TypeVisitor extends Visitor {
     super.visitProgram(program)
 
     for (const propertyTypeSymbol of this.propertyTypeSymbols) {
-      this.visitClassDeclaration(propertyTypeSymbol)
+      const message = this.visitClassDeclaration(propertyTypeSymbol)
+      if (message) {
+        this.proto.statements.push(message)
+      }
     }
   }
 
-  visitClassDeclaration(symbol: ts.Symbol): void {
-    this.writer.writeNewline()
-
+  visitClassDeclaration(symbol: ts.Symbol): ast.Message | null {
     this.fieldNumber = 0
-
-    this.writer.writeRaw(`message ${symbol.escapedName} {`)
-    this.writer.writeNewline()
-    this.writer.increaseIndent()
-
-    super.visitClassDeclaration(symbol)
-
-    this.writer.decreaseIndent()
-    this.writer.writeRaw('}')
-    this.writer.writeNewline()
+    return super.visitClassDeclaration(symbol)
   }
 
-  visitClassProperty(symbol: ts.Symbol): void {
+  visitClassProperty(symbol: ts.Symbol): ast.Field | null {
+    let type: string | undefined
+    let name: string | undefined
+    let label: string | undefined
+
     let propertyType = this.checker.getTypeOfSymbol(symbol)
     let propertyTypeString = this.checker.typeToString(propertyType)
 
@@ -95,8 +113,7 @@ class TypeVisitor extends Visitor {
       const { types } = propertyType as ts.UnionType
       // like `number | undefined`
       if (types.length === 2 && types.some(type => this.checker.typeToString(type) === 'undefined')) {
-        this.writer.writeRaw('optional')
-        this.writer.writeSpace()
+        label = 'optional'
 
         propertyType = types.find(type => this.checker.typeToString(type) !== 'undefined')!
         propertyTypeString = this.checker.typeToString(propertyType)
@@ -104,16 +121,13 @@ class TypeVisitor extends Visitor {
         throw new Error(`This union type is not supported: ${propertyTypeString}`)
       }
     } else if (symbol.flags & ts.SymbolFlags.Optional) {
-      this.writer.writeRaw('optional')
-      this.writer.writeSpace()
+      label = 'optional'
     }
 
     if (PRIMITIVE_TYPE_MAPPING[propertyTypeString]) {
-      this.writer.writeRaw(PRIMITIVE_TYPE_MAPPING[propertyTypeString])
-      this.writer.writeSpace()
+      type = PRIMITIVE_TYPE_MAPPING[propertyTypeString]
     } else if (this.checker.isArrayType(propertyType)) {
-      this.writer.writeRaw('repeated')
-      this.writer.writeSpace()
+      label = 'repeated'
 
       const { typeArguments } = propertyType as ts.TypeReference
       if (typeArguments && typeArguments.length !== 1) {
@@ -122,46 +136,48 @@ class TypeVisitor extends Visitor {
 
       const arrayItemType = (propertyType as any).typeArguments[0]
 
-      this.writer.writeRaw(this.checker.typeToString(arrayItemType))
-      this.writer.writeSpace()
+      type = this.checker.typeToString(arrayItemType)
 
       this.propertyTypeSymbols.add(arrayItemType.symbol)
     } else if (propertyType.flags & ts.TypeFlags.Object) {
-      this.writer.writeRaw(propertyTypeString)
-      this.writer.writeSpace()
+      type = propertyTypeString
 
       this.propertyTypeSymbols.add(propertyType.symbol)
     } else {
       throw new Error(`This type is not supported: ${propertyTypeString}`)
     }
 
-    this.writer.writeRaw(symbol.escapedName.toString())
-    this.writer.writeSpace()
+    name = symbol.escapedName.toString()
 
-    this.writer.writeRaw('=')
-    this.writer.writeSpace()
-    this.writer.writeRaw(this.fieldNumber.toString())
+    const field = ast.field(type, name, this.fieldNumber)
+    field.fieldLabel = label
+
     this.fieldNumber += 1
 
-    this.writer.writeRaw(';')
-    this.writer.writeNewline()
+    return field
+  }
 
-    super.visitClassProperty(symbol)
+  toString() {
+    const codegen = new CodeGenerator()
+    codegen.emitProto(this.proto)
+    return codegen.toString()
   }
 }
 
 class JSDocVisitor extends TypeVisitor {
-  visitClassProperty(symbol: ts.Symbol): void {
-    const comments = symbol.getDocumentationComment(this.checker)
-    for (const comment of comments) {
-      if (comment.kind === 'text') {
-        this.writer.writeRaw('//')
-        this.writer.writeSpace()
-        this.writer.writeRaw(comment.text)
-        this.writer.writeNewline()
+  visitClassProperty(symbol: ts.Symbol): ast.Field | null {
+    const field = super.visitClassProperty(symbol)
+    if (field) {
+      const comments = symbol.getDocumentationComment(this.checker)
+      for (const comment of comments) {
+        if (comment.kind === 'text') {
+          field.leadingComments.push(
+            ast.singlelineComment(comment.text)
+          )
+        }
       }
     }
-    super.visitClassProperty(symbol)
+    return field
   }
 }
 
@@ -175,13 +191,9 @@ export function transform(rootNames: readonly string[]): string | undefined {
 
   // Get the checker, we will use it to find more about classes
   const checker = program.getTypeChecker()
-  const writer = new Writer()
 
-  writer.writeRaw('syntax = "proto3";')
-  writer.writeNewline()
-
-  const visitor = new JSDocVisitor(checker, writer)
+  const visitor = new JSDocVisitor(checker)
   visitor.visitProgram(program)
 
-  return writer.toString()
+  return visitor.toString()
 }

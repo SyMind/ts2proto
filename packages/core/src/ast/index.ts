@@ -1,5 +1,5 @@
 import { TopLevelStatement, Proto, Syntax } from './proto'
-import { Message, MessageBodyStatement } from './top-level-definitions';
+import { Message, MessageBody, MessageBodyStatement } from './top-level-definitions';
 import { Field } from './fields';
 import { SinglelineComment } from './lexical-elements';
 
@@ -10,22 +10,26 @@ export * from './lexical-elements';
 export * from './textproto';
 export * from './top-level-definitions';
 
-export function proto(statements: TopLevelStatement[]): Proto {
+export function proto(statements: TopLevelStatement[] = []): Proto {
   return {
     statements
   }
 }
 
-export function message(name: string, statements: MessageBodyStatement[] = []): Message {
+export function message(name: string, messageBody: MessageBody): Message {
   return {
     type: 'message',
     messageName: name,
-    messageBody: {
-      type: 'message-body',
-      statements
-    },
+    messageBody,
     leadingComments: [],
     trailingComments: [],
+  }
+}
+
+export function messageBody(statements: MessageBodyStatement[] = []): MessageBody {
+  return {
+    type: 'message-body',
+    statements
   }
 }
 

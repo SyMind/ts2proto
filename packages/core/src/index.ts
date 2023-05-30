@@ -9,14 +9,8 @@ const PRIMITIVE_TYPE_MAPPING: Record<string, string> = {
   boolean: 'bool',
 }
 
-type WIP = ast.Message
-  | ast.MessageBody
-  | null
-
 class Visitor {
   proto = ast.proto()
-
-  wip: WIP = null
 
   constructor(protected checker: ts.TypeChecker) {
     this.proto.statements.push(ast.syntax('proto3'))

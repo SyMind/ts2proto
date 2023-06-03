@@ -65,7 +65,7 @@ export interface BoolLit extends Token {
 
 export interface StrLit {
   type: 'str-lit';
-  tokens: Token[];
+  text: string;
 }
 
 export interface Aggregate {

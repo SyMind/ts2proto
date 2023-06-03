@@ -1,6 +1,5 @@
 import {
   Constant,
-  Dot,
   Empty,
   FullIdent,
   Semi,
@@ -14,7 +13,6 @@ import {
   ExtendBodyStatement,
   Message,
   MessageBodyStatement,
-  RpcBodyStatement,
   Service,
   ServiceBodyStatement,
 } from './top-level-definitions';
@@ -48,7 +46,7 @@ export type Statement =
   | EnumBodyStatement
   | ExtendBodyStatement
   | ServiceBodyStatement
-  | RpcBodyStatement;
+  | Option;
 
 export type TopLevelStatement =
   | Syntax
@@ -87,21 +85,7 @@ export interface Package extends StatementBase {
 
 export interface Option extends StatementBase {
   type: 'option';
-  keyword: string;
-  optionName: OptionName;
-  eq: Token;
+  optionName: string;
   constant: Constant;
-  semi: Semi;
 }
 
-export interface OptionName {
-  type: 'option-name';
-  optionNameSegmentOrDots: (OptionNameSegment | Dot)[];
-}
-
-export interface OptionNameSegment {
-  type: 'option-name-segment';
-  bracketOpen?: Token;
-  name: FullIdent;
-  bracketClose?: Token;
-}

@@ -15,18 +15,32 @@ test('codegen', t => {
 
   grandChildren.fieldLabel = 'repeated'
 
+  const message = ast.message(
+    'Simple',
+    ast.messageBody([
+      name,
+      age,
+      child,
+      grandChildren,
+      double,
+    ])
+  )
+
+  const service = ast.service(
+    'SimpleService',
+    ast.serviceBody([
+      ast.rpc(
+        'Search',
+        'SearchRequest',
+        'SearchResponse'
+      )
+    ])
+  )
+
   const proto = ast.proto([
     ast.syntax('proto3'),
-    ast.message(
-      'Simple',
-      ast.messageBody([
-        name,
-        age,
-        child,
-        grandChildren,
-        double,
-      ])
-    )
+    message,
+    service
   ])
 
   const generator = new CodeGenerator()
@@ -42,6 +56,10 @@ message Simple {
   Child child = 2;
   repeated Child grandChildren = 3;
   double code = 4;
+}
+
+service SimpleService {
+  rpc Search(SearchRequest) returns (SearchResponse);
 }
 `)
 })

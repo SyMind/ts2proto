@@ -4,6 +4,7 @@
     "declaration": true,
     "skipLibCheck": true,
     "baseUrl": "./",
+    "outDir": "dist",
     "lib": ["esnext", "dom"],
     "target": "es6",
     "moduleResolution": "node",

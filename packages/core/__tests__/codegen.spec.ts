@@ -33,6 +33,26 @@ test('codegen', t => {
         'Search',
         'SearchRequest',
         'SearchResponse'
+      ),
+      ast.rpc(
+        'Query',
+        'QueryRequest',
+        'QueryResponse'
+      ),
+    ])
+  )
+
+  const serviceWithOption = ast.service(
+    'SimpleServiceWithOptiion',
+    ast.serviceBody([
+      ast.rpc(
+        'Search',
+        'SearchRequest',
+        'SearchResponse',
+        ast.rpcBody([
+          ast.option('get', ast.strLit('/simple')),
+          ast.option('serializer', ast.strLit('json')),
+        ])
       )
     ])
   )
@@ -40,7 +60,8 @@ test('codegen', t => {
   const proto = ast.proto([
     ast.syntax('proto3'),
     message,
-    service
+    service,
+    serviceWithOption
   ])
 
   const generator = new CodeGenerator()
@@ -60,6 +81,14 @@ message Simple {
 
 service SimpleService {
   rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Query(QueryRequest) returns (QueryResponse);
+}
+
+service SimpleServiceWithOptiion {
+  rpc Search(SearchRequest) returns (SearchResponse) {
+    option (get) = "/simple";
+    option (serializer) = "json";
+  }
 }
 `)
 })

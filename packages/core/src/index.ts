@@ -1,3 +1,4 @@
+import * as path from 'path'
 import * as ts from 'typescript'
 import * as ast from './ast'
 import { CodeGenerator } from './codegen'
@@ -111,14 +112,22 @@ const DEFAULT_PLUGINS = [
 ]
 
 interface Config {
+  tsConfig: string | ts.ParsedCommandLine
   plugins?: Plugin[]
 }
 
-export function transform(rootNames: readonly string[], config: Config = {}): string | undefined {
-  const program = ts.createProgram(rootNames, {
-    target: ts.ScriptTarget.ES5,
-    module: ts.ModuleKind.CommonJS,
-    strict: true
+export function transform(config: Config): string | undefined {
+  const tsConfig = (function () {
+    if (typeof config.tsConfig === 'string') {
+      const tsParsedConfig = ts.readJsonConfigFile(config.tsConfig, ts.sys.readFile)
+      return ts.parseJsonSourceFileConfigFileContent(tsParsedConfig, ts.sys, path.dirname(config.tsConfig))
+    }
+    return config.tsConfig
+  })()
+  
+  const program = ts.createProgram({
+    rootNames: tsConfig.fileNames,
+    options: tsConfig.options
   })
 
   const plugins = config.plugins ?? DEFAULT_PLUGINS

@@ -50,7 +50,34 @@ export class CodeGenerator {
   }
 
   emitOption(node: ast.Option): void {
-    
+    this.writer.writeRaw('option')
+    this.writer.writeSpace()
+
+    this.writer.writeRaw('(')
+    this.writer.writeRaw(node.optionName)
+    this.writer.writeRaw(')')
+
+    this.writer.writeSpace()
+    this.writer.writeRaw('=')
+    this.writer.writeSpace()
+
+    this.emitConstant(node.constant)
+
+    this.writer.writeRaw(';')
+  }
+
+  emitConstant(node: ast.Constant) {
+    switch(node.type) {
+      case 'str-lit':
+        this.emitStrLit(node)
+        break
+    }
+  }
+
+  emitStrLit(node: ast.StrLit) {
+    this.writer.writeRaw('"')
+    this.writer.writeRaw(node.text)
+    this.writer.writeRaw('"')
   }
 
   emitTopLevelDef(node: ast.TopLevelDef): void {
@@ -67,7 +94,6 @@ export class CodeGenerator {
   }
 
   emitEmpty(node: ast.Empty): void {
-
   }
 
   emitMessage(node: ast.Message): void {
@@ -184,10 +210,10 @@ export class CodeGenerator {
 
     for (const statement of node.statements) {
       this.emitServiceBodyStatement(statement)
+      this.writer.writeNewline()
     }
 
     this.writer.decreaseIndent()
-    this.writer.writeNewline()
     this.writer.writeRaw('}')
     this.writer.writeNewline()
   }
@@ -219,6 +245,7 @@ export class CodeGenerator {
     this.writer.writeRaw(')')
 
     if (node.rpcBody) {
+      this.writer.writeSpace()
       this.emitRpcBody(node.rpcBody)
     } else {
       this.writer.writeRaw(';')
@@ -226,7 +253,17 @@ export class CodeGenerator {
   }
 
   emitRpcBody(node: ast.RpcBody): void {
+    this.writer.writeRaw('{')
+    this.writer.increaseIndent()
+    this.writer.writeNewline()
 
+    for (const statement of node.statements) {
+      this.emitOption(statement)
+      this.writer.writeNewline()
+    }
+
+    this.writer.decreaseIndent()
+    this.writer.writeRaw('}')
   }
 
   emitField(node: ast.Field): void {

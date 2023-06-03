@@ -55,7 +55,7 @@ class TraversalContext {
       this.visitSourceFile(sourceFile)
     }
 
-    for (const visitor of this.visitors) {
+    for (const visitor of [...this.visitors].reverse()) {
       visitor.Program?.exit?.(this.program, this.state)
     }
   }
@@ -86,7 +86,7 @@ class TraversalContext {
       property => this.visitClassPrototypeProperty(property)
     )
 
-    for (const visitor of this.visitors) {
+    for (const visitor of [...this.visitors]) {
       visitor.ClassDeclaration?.exit?.(symbol, this.state)
     }
   }
@@ -96,7 +96,7 @@ class TraversalContext {
       visitor.ClassPrototypeProperty?.enter?.(symbol, this.state)
     }
 
-    for (const visitor of this.visitors) {
+    for (const visitor of [...this.visitors]) {
       visitor.ClassPrototypeProperty?.exit?.(symbol, this.state)
     }
   }

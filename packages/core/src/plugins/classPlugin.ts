@@ -1,6 +1,6 @@
 import * as ts from 'typescript'
 import * as ast from '../ast'
-import type { Visitor } from '..'
+import type { Plugin } from '..'
 
 const PRIMITIVE_TYPE_MAPPING: Record<string, string> = {
   string: 'string',
@@ -17,7 +17,7 @@ function isNodeExported(node: ts.Node): boolean {
   return (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0
 }
 
-export const classVisitor: Visitor = {
+export const classPlugin: Plugin = () => ({
   Program: {
     enter(program, state) {
       state.proto.statements.push(ast.syntax('proto3'))
@@ -104,4 +104,4 @@ export const classVisitor: Visitor = {
       fieldNumber += 1
     }
   }
-}
+})

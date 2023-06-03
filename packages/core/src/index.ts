@@ -1,8 +1,8 @@
 import * as ts from 'typescript'
 import * as ast from './ast'
 import { CodeGenerator } from './codegen'
-import { classVisitor } from './visitor/classVisitor'
-import { jsDocVisitor } from './visitor/jsDocVisitor'
+import { classPlugin } from './plugins/classPlugin'
+import { jsDocPlugin } from './plugins/jsDocPlugin'
 
 interface State extends Record<string, any> {
   proto: ast.Proto
@@ -26,6 +26,8 @@ export type Visitor = {
   ClassDeclaration?: VisitNodeObject<ts.Symbol>
   ClassPrototypeProperty?: VisitNodeObject<ts.Symbol>
 }
+
+export type Plugin<T = Record<string, any>> = (options?: T) => Visitor
 
 class TraversalContext {
   private state: State
@@ -110,7 +112,7 @@ export function transform(rootNames: readonly string[]): string | undefined {
     strict: true
   })
 
-  const visitors: Visitor[] = [classVisitor, jsDocVisitor]
+  const visitors: Visitor[] = [classPlugin(), jsDocPlugin()]
 
   const context = new TraversalContext(program, visitors)
   context.visitProgram()

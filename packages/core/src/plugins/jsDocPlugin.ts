@@ -1,7 +1,7 @@
 import * as ast from '../ast'
-import type { Visitor } from '..'
+import type { Plugin } from '..'
 
-export const jsDocVisitor: Visitor = {
+export const jsDocPlugin: Plugin = () => ({
   ClassPrototypeProperty: {
     exit(property, state) {
       if (state.field) {
@@ -16,4 +16,4 @@ export const jsDocVisitor: Visitor = {
       }
     }
   }
-}
+})

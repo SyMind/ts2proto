@@ -27,7 +27,7 @@ export type Visitor = {
   ClassPrototypeProperty?: VisitNodeObject<ts.Symbol>
 }
 
-export type Plugin<T = Record<string, any>> = (options?: T) => Visitor
+export type Plugin = () => Visitor
 
 class TraversalContext {
   private state: State
@@ -105,14 +105,24 @@ class TraversalContext {
   }
 }
 
-export function transform(rootNames: readonly string[]): string | undefined {
+const DEFAULT_PLUGINS = [
+  classPlugin,
+  jsDocPlugin
+]
+
+interface Config {
+  plugins?: Plugin[]
+}
+
+export function transform(rootNames: readonly string[], config: Config = {}): string | undefined {
   const program = ts.createProgram(rootNames, {
     target: ts.ScriptTarget.ES5,
     module: ts.ModuleKind.CommonJS,
     strict: true
   })
 
-  const visitors: Visitor[] = [classPlugin(), jsDocPlugin()]
+  const plugins = config.plugins ?? DEFAULT_PLUGINS
+  const visitors: Visitor[] = plugins.map(plugin => plugin())
 
   const context = new TraversalContext(program, visitors)
   context.visitProgram()

@@ -88,40 +88,29 @@ export type ExtendBodyStatement =
 
 export interface Service extends StatementBase {
   type: 'service';
-  keyword: string;
-  serviceName: Token;
+  serviceName: string;
   serviceBody: ServiceBody;
 }
 
 export interface ServiceBody {
   type: 'service-body';
-  bracketOpen: Token;
   statements: ServiceBodyStatement[];
-  bracketClose: Token;
 }
 
 export type ServiceBodyStatement = Option | Rpc | Empty;
 
 export interface Rpc extends StatementBase {
   type: 'rpc';
-  keyword: string;
-  rpcName: Token;
-  reqType: RpcType;
-  returns: Token;
-  resType: RpcType;
-  semiOrRpcBody: Semi | RpcBody;
+  rpcName: string;
+  reqType: string;
+  resType: string;
+  rpcBody?: RpcBody;
 }
 
 export interface RpcBody {
   type: 'rpc-body';
-  bracketOpen: Token;
-  statements: RpcBodyStatement[];
-  bracketClose: Token;
+  statements: Option[];
 }
-
-export type RpcBodyStatement =
-  | Option
-  | Empty;
 
 export interface RpcType {
   bracketOpen: Token;

@@ -72,22 +72,26 @@ export class CodeGenerator {
 
   emitMessage(node: ast.Message): void {
     this.writer.writeNewline()
+    this.writer.writeRaw('message')
+    this.writer.writeSpace()
+    this.writer.writeRaw(node.messageName)
+    this.writer.writeSpace()
 
-    this.writer.writeRaw(`message ${node.messageName} {`)
+    this.emitMessageBody(node.messageBody)
+  }
+
+  emitMessageBody(node: ast.MessageBody): void {
+    this.writer.writeRaw('{')
     this.writer.writeNewline()
     this.writer.increaseIndent()
 
-    this.emitMessageBody(node.messageBody)
+    for (const statement of node.statements) {
+      this.emitMessageBodyStatement(statement)
+    }
 
     this.writer.decreaseIndent()
     this.writer.writeRaw('}')
     this.writer.writeNewline()
-  }
-
-  emitMessageBody(node: ast.MessageBody): void {
-    for (const statement of node.statements) {
-      this.emitMessageBodyStatement(statement)
-    }
   }
 
   emitMessageBodyStatement(node: ast.MessageBodyStatement): void {
@@ -163,6 +167,65 @@ export class CodeGenerator {
   }
 
   emitService(node: ast.Service): void {
+    this.writer.writeNewline()
+
+    this.writer.writeRaw('service')
+    this.writer.writeSpace()
+    this.writer.writeRaw(node.serviceName)
+
+    this.writer.writeSpace()
+    this.emitServiceBody(node.serviceBody)
+  }
+
+  emitServiceBody(node: ast.ServiceBody): void {
+    this.writer.writeRaw('{')
+    this.writer.writeNewline()
+    this.writer.increaseIndent()
+
+    for (const statement of node.statements) {
+      this.emitServiceBodyStatement(statement)
+    }
+
+    this.writer.decreaseIndent()
+    this.writer.writeNewline()
+    this.writer.writeRaw('}')
+    this.writer.writeNewline()
+  }
+
+  emitServiceBodyStatement(node: ast.ServiceBodyStatement): void {
+    switch(node.type) {
+      case 'rpc':
+        this.emitRpc(node)
+        break
+    }
+  }
+
+  emitRpc(node: ast.Rpc): void {
+    this.writer.writeRaw('rpc')
+    this.writer.writeSpace()
+
+    this.writer.writeRaw(node.rpcName)
+
+    this.writer.writeRaw('(')
+    this.writer.writeRaw(node.reqType)
+    this.writer.writeRaw(')')
+
+    this.writer.writeSpace()
+    this.writer.writeRaw('returns')
+    this.writer.writeSpace()
+  
+    this.writer.writeRaw('(')
+    this.writer.writeRaw(node.resType)
+    this.writer.writeRaw(')')
+
+    if (node.rpcBody) {
+      this.emitRpcBody(node.rpcBody)
+    } else {
+      this.writer.writeRaw(';')
+    }
+  }
+
+  emitRpcBody(node: ast.RpcBody): void {
 
   }
 

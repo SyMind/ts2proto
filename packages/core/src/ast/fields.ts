@@ -1,4 +1,4 @@
-import { Token, Option, OptionName, StatementBase } from './proto';
+import { Token, Option, StatementBase } from './proto';
 import {
   Comma,
   Constant,
@@ -26,7 +26,7 @@ export interface FieldOptions {
 
 export interface FieldOption {
   type: 'field-option';
-  optionName: OptionName;
+  optionName: string;
   eq: Token;
   constant: Constant;
 }

@@ -5,6 +5,8 @@ import { CodeGenerator } from './codegen'
 import { classPlugin } from './plugins/classPlugin'
 import { jsDocPlugin } from './plugins/jsDocPlugin'
 
+export * as ast from './ast'
+
 interface State extends Record<string, any> {
   proto: ast.Proto
   context: TraversalContext
